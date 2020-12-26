@@ -74,19 +74,19 @@ def airplane(depart, arrival, departureTime, ArrivalTime):
     headers2 = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrom"
                               "e/81.0.4044.129 Safari/537.36"}
     session = requests.session()
-    r = session.get('https://www.qunar.com/', headers=headers2, verify=False)
+    r = session.get('https://www.qunar.com/', headers=headers2)
     data = {
         'jsonpCallback': 'jQuery172023444984329029928_' + str(int(time.time() * 1000)),
         'conf_type': '4',
         'confKey': 'json.trainCalendarConfig',
         '_': str(int(time.time() * 1000))
     }
-    r = session.get('https://touch.train.qunar.com/api/train/trainHotConf', headers=headers2, params=data, verify=False)
+    r = session.get('https://touch.train.qunar.com/api/train/trainHotConf', headers=headers2, params=data)
     cookie = dict_from_cookiejar(session.cookies)
     fromplace = city_dict[depart]
     toplace = city_dict[arrival]
     url = f"https://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport={depart}&searchArrivalAirport={arrival}&searchDepartureTime={departureTime}&searchArrivalTime={ArrivalTime}&nextNDays=0&startSearch=true&fromCode={fromplace}&toCode={toplace}&from=qunarindex&lowestPrice=null"
-    r = session.get(url, headers=headers2, verify=False)
+    r = session.get(url, headers=headers2)
     with open('header_arg.js', 'r')as f:
         content = f.read()
     ctx = execjs.compile(content)
@@ -103,17 +103,17 @@ def airplane(depart, arrival, departureTime, ArrivalTime):
     result = ctx.call('res')
     headers['pre'] = result
     headers.update(headers_arg[1])
-    data = {"departureCity": depart,
-            "arrivalCity": arrival,
-            "departureDate": departureTime,
-            "ex_track": "",
-            "__m__": headers_arg[0],
-            "st": str(int(time.time() * 1000)),
-            "sort": "",
-            "_v": "4"
-            }
-    r = session.get('https://flight.qunar.com/touch/api/domestic/wbdflightlist', headers=headers, params=data,
-                    verify=False)
+    data = {
+        "departureCity": depart,
+        "arrivalCity": arrival,
+        "departureDate": departureTime,
+        "ex_track": "",
+        "__m__": headers_arg[0],
+        "st": str(int(time.time() * 1000)),
+        "sort": "",
+        "_v": "4"
+    }
+    r = session.get('https://flight.qunar.com/touch/api/domestic/wbdflightlist', headers=headers, params=data)
     t1000 = re.sub('\(new Image\).*?,', '', r.json()['t1000'])
     js = 'function parse(){' + 'window = {open:true, navigator:{webdriver:undefined}};' + 'a=' + r.text + ';b=' + t1000 + ';b(a);return a}'
     ctx = execjs.compile(js)
@@ -122,4 +122,4 @@ def airplane(depart, arrival, departureTime, ArrivalTime):
 
 
 if __name__ == '__main__':
-    airplane('深圳', '北京', '2020-07-24', '2020-07-25')
+    airplane('深圳', '北京', '2020-09-08', '2020-09-10')
